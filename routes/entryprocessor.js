@@ -5,7 +5,7 @@ router.get('/', function(req, res, next) {
   const entryNr = req.query.entry;
   res.send({
     entryNr: entryNr,
-    entryStatus: 'processing'
+    entryStatus: 'processing...'
   });
 });
 
