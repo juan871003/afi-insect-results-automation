@@ -12,6 +12,6 @@
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "morgan": "~1.9.1",
-    "puppeteer-core": "^1.17.0"
+    "puppeteer": "^1.17.0"
   }
 }
