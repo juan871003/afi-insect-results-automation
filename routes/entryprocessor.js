@@ -17,7 +17,7 @@ router.get('/', function (req, res, next) {
 
   res.send({
     entryNr: entryNr,
-    entryStatus: 'processing...'
+    entryStatus: 'processing....'
   });
 });
 
