@@ -21,22 +21,23 @@ const entryNrApp = (function() {
   }
 
   function updateUIEntry(response) {
-    const htmlEntryId = entryStatusTmpltId.replace('{entryNr}', response.entryNr);
-    const existingEntryHtml = document.getElementById(htmlEntryId);
-    const innerHTML = entryStatusInnerTmplt
-      .replace('{entryNr}', response.entryNr)
-      .replace('{entryStatus}', response.entryStatus);
-    if (existingEntryHtml) {
-      existingEntryHtml.innerHTML = innerHTML;
-    } else {
-      const finalHTML = entryStatusTmplt
-        .replace('{entryStatusTmpltId}', htmlEntryId)
-        .replace('{entryStatusInnerTmplt}', innerHTML);
-      const container = document.getElementById('entries-status');
-      container.insertAdjacentHTML('beforeend', finalHTML);
+    const entries = response;
+    for(let entry of entries) {
+      const htmlEntryId = entryStatusTmpltId.replace('{entryNr}', entry.entryNr);
+      const existingEntryHtml = document.getElementById(htmlEntryId);
+      const innerHTML = entryStatusInnerTmplt
+        .replace('{entryNr}', entry.entryNr)
+        .replace('{entryStatus}', entry.status);
+        if (existingEntryHtml) {
+          existingEntryHtml.innerHTML = innerHTML;
+        } else {
+          const finalHTML = entryStatusTmplt
+            .replace('{entryStatusTmpltId}', htmlEntryId)
+            .replace('{entryStatusInnerTmplt}', innerHTML);
+          const container = document.getElementById('entries-status');
+          container.insertAdjacentHTML('beforeend', finalHTML);
+        }
     }
-    
-    console.log(response);
   }
 
   function setupEventListeners() {
@@ -61,10 +62,22 @@ const entryNrApp = (function() {
     });
   }
 
+  function getResults() {
+    const xhttp = new XMLHttpRequest();
+    xhttp.open('GET', `processentry`, true);
+    xhttp.send();
+    xhttp.onreadystatechange = function() {
+      if(this.readyState == 4 && this.status == 200) {
+        updateUIEntry(JSON.parse(this.response));
+      }
+    };
+  }
+
   return {
     initialise: function() {
       clearInputs();
       setupEventListeners();
+      getResults();
     }
   };
 })();

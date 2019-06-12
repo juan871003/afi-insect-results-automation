@@ -1,24 +1,23 @@
 var express = require('express');
 var router = express.Router();
+var scrapper = null;
+
+router.initialiseScrpr = function(scpr) {
+  scrapper = scpr;
+  return router;
+}
 
 router.get('/', function (req, res, next) {
-  const entryNr = req.query.entry;
-  
-  const puppeteer = require('puppeteer');
-  // const env = process.env.USERNAME === "juan8" ? "dev" : "prod";
-  /* (async () => {
-    const browser = await puppeteer.launch({ executablePath: '/usr/bin/google-chrome-stable', headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  if (req.query.entry) {
+    const entryNr = req.query.entry;
+    scrapper.addEntry(entryNr);
+  }
 
-    const page = await browser.newPage();
-    await page.goto('https://www.example.com'); await page.screenshot({ path: 'screenshot.png', fullPage: true });
-    browser.close();
-  })(); */
-
-
-  res.send({
-    entryNr: entryNr,
-    entryStatus: 'processing....'
-  });
+  let response = [];
+  for (let [entryNr, status] of scrapper.getEntries()) {
+    response.push({ entryNr: entryNr, status: status});
+  }
+  res.send(response);
 });
 
-module.exports = router;
+module.exports = (scpr) => router.initialiseScrpr(scpr, 0.5);
