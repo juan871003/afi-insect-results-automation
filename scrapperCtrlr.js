@@ -10,13 +10,13 @@ let mainPage = null;
 const scrapperCtrl = {
   initialise: async function(env, intervalMinutes) {
     if (!initialised) {
-      if (env === 'prod') {
+      /* if (env === 'prod') { */
         launchConfig = { 
           executablePath: '/usr/bin/google-chrome-stable',
           headless: true, 
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--single-process'],
         };
-      }
+      /* } */
       browser = await puppeteer.launch(launchConfig);
       mainPage = await browser.newPage();
       
