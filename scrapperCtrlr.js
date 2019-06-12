@@ -17,8 +17,8 @@ const scrapperCtrl = {
           args: ['--no-sandbox', '--disable-setuid-sandbox'] 
         };
       }
-      browser = await puppeteer.launch(launchConfig);
-      mainPage = await browser.newPage();
+      // browser = await puppeteer.launch(launchConfig);
+      // mainPage = await browser.newPage();
       // setInterval(checkEntriesResultsLoop, intervalMinutes * 60000);
       setInterval(checkEntriesResultsLoop, 3000);
       initialised = true;
