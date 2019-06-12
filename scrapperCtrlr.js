@@ -12,7 +12,7 @@ const scrapperCtrl = {
     if (!initialised) {
       if (env === 'prod') {
         launchConfig = { 
-          /* executablePath: '/usr/bin/google-chrome-stable', */
+          executablePath: '/usr/bin/google-chrome-stable',
           headless: true, 
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--single-process'],
         };
