@@ -4,8 +4,6 @@ let launchConfig = {headless: true};
 let entries = new Map();
 let initialised = false;
 let scrapping = false;
-let browser = null;
-let mainPage = null;
 
 const scrapperCtrl = {
   initialise: async function(env, intervalMinutes) {
@@ -17,8 +15,6 @@ const scrapperCtrl = {
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--single-process'],
         };
       }
-      browser = await puppeteer.launch(launchConfig);
-      mainPage = await browser.newPage();
       
       setInterval(checkEntriesResultsLoop, intervalMinutes * 60000);
 
@@ -51,14 +47,16 @@ async function checkEntriesResultsLoop() {
 }
 
 async function scrap(entriesToScrapp) {
-  await gotoMainPage(page);
+  browser = await puppeteer.launch(launchConfig);
+  mainPage = await browser.newPage();
+  await gotoMainPage(mainPage);
   for(const entryNr of entriesToScrapp) {
-    const newPage = await getEntryPage(page, entryNr);
+    const newPage = await getEntryPage(mainPage, entryNr);
     const status = await getEntryStatus(newPage);
     entries.set(entryNr, status);
     await newPage.close();
   }
-  await page.waitFor(1000);
+  await mainPage.waitFor(1000);
   await browser.close();
 }
 
@@ -102,6 +100,14 @@ async function getEntryStatus(newPage) {
   const status = await newPage.evaluate(statusEl => statusEl.textContent, statusHandle[0]);
   await disposeHandle(statusHandle);
   return status;
+}
+
+async function disposeHandle(handle) {
+  if (handle) {
+    for (let i = 0; i < handle.length; i++) {
+      await handle[i].dispose();
+    }
+  }
 }
 
 module.exports = scrapperCtrl;
