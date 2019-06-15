@@ -20,7 +20,7 @@ const scrapperCtrl = {
       browser = await puppeteer.launch(launchConfig);
       mainPage = await browser.newPage();
       
-      // setInterval(checkEntriesResultsLoop, intervalMinutes * 60000);
+      setInterval(checkEntriesResultsLoop, intervalMinutes * 60000);
 
       initialised = true;
       return true;
