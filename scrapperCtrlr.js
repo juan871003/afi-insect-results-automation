@@ -10,18 +10,17 @@ let mainPage = null;
 const scrapperCtrl = {
   initialise: async function(env, intervalMinutes) {
     if (!initialised) {
-      /* if (env === 'prod') { */
+      if (env !== 'dev') {
         launchConfig = { 
           executablePath: '/usr/bin/google-chrome-stable',
           headless: true, 
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--single-process'],
         };
-      /* } */
+      }
       browser = await puppeteer.launch(launchConfig);
       mainPage = await browser.newPage();
       
       // setInterval(checkEntriesResultsLoop, intervalMinutes * 60000);
-      checkEntriesResultsLoop();
 
       initialised = true;
       return true;
@@ -30,7 +29,6 @@ const scrapperCtrl = {
   },
 
   addEntry(entryNr) {
-    // entries.push(new Entry(entryNr, 'Pending...'));
     entries.set(entryNr, 'Processing...')
   },
 

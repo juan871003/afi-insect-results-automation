@@ -20,4 +20,4 @@ router.get('/', function (req, res, next) {
   res.send(response);
 });
 
-module.exports = (scpr) => router.initialiseScrpr(scpr, 0.5);
+module.exports = (scpr) => router.initialiseScrpr(scpr, 5);
