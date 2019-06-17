@@ -14,10 +14,10 @@ router.get('/', function (req, res, next) {
   }
 
   let response = [];
-  for (let [entryNr, status] of scrapper.getEntries()) {
-    response.push({ entryNr: entryNr, status: status});
+  for (let [entryNr, results] of scrapper.getEntries()) {
+    response.push({ entryNr: entryNr, results: {status: results.status, comments: results.comments }});
   }
   res.send(response);
 });
 
-module.exports = (scpr) => router.initialiseScrpr(scpr, 1);
+module.exports = (scpr) => router.initialiseScrpr(scpr);

@@ -7,7 +7,7 @@ const logger = require('morgan');
 const app = express();
 
 const scrapper = require('./scrapperCtrlr');
-scrapper.initialise(app.get('env') === 'development' ? 'dev' : 'prod');
+scrapper.initialise(app.get('env') === 'development' ? 'dev' : 'prod', 1);
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');

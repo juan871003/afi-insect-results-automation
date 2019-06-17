@@ -3,7 +3,7 @@ const entryNrApp = (function() {
   const inputEntryNr = document.getElementById("input-entry-number");
   const btnEntryNr = document.getElementById("button-entry-number");
   const entryStatusTmpltId = 'entry-status-{entryNr}';
-  const entryStatusInnerTmplt = 'Entry {entryNr} has status {entryStatus}';
+  const entryStatusInnerTmplt = 'Entry {entryNr} has status {entryStatus} and comments: {entryComments}';
   const entryStatusTmplt = '<div id="{entryStatusTmpltId}">{entryStatusInnerTmplt}</div>';
 
   function clearInputs() {
@@ -27,7 +27,8 @@ const entryNrApp = (function() {
       const existingEntryHtml = document.getElementById(htmlEntryId);
       const innerHTML = entryStatusInnerTmplt
         .replace('{entryNr}', entry.entryNr)
-        .replace('{entryStatus}', entry.status);
+        .replace('{entryStatus}', entry.results.status)
+        .replace('{entryComments}', entry.results.comments.length > 0 ? entry.results.comments : 'None');
         if (existingEntryHtml) {
           existingEntryHtml.innerHTML = innerHTML;
         } else {
