@@ -1,8 +1,28 @@
 body {
   padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-color: #eee !important;
 }
 
-a {
-  color: #00B7FF;
+.main-logo {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.main-title {
+  color:#014A22;
+}
+
+.form-centre {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.card-body {
+  color: #212529;
+}
+
+.card.custom-card {
+  border-radius: 0.5rem;
+  box-shadow: 7px 7px 30px -5px rgba(0,0,0,0.1);
 }

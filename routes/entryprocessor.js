@@ -13,6 +13,11 @@ router.get('/', function (req, res, next) {
     scrapper.addEntry(entryNr);
   }
 
+  if (req.query.removeentry) {
+    const entryNr = req.query.removeentry;
+    scrapper.removeEntry(entryNr);
+  }
+
   let response = [];
   for (let [entryNr, results] of scrapper.getEntries()) {
     response.push({ entryNr: entryNr, results: {status: results.status, comments: results.comments }});

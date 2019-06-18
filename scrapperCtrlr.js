@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 
 let launchConfig = {headless: true};
 let entries = new Map();
+let entriesToRemove = new Set();
 let initialised = false;
 let scrapping = false;
 
@@ -25,6 +26,13 @@ const scrapperCtrl = {
 
   addEntry(entryNr) {
     entries.set(entryNr, {status: 'Processing...', comments: ''});
+  },
+
+  removeEntry(entryNr) {
+    if(scrapping) {
+      entriesToRemove.add(entryNr);
+    }
+    entries.delete(entryNr);
   },
 
   getEntries() {
@@ -54,7 +62,12 @@ async function scrap(entriesToScrapp) {
     const newPage = await getEntryPage(mainPage, entryNr);
     const status = await getEntryStatus(newPage);
     results = await getEntryResults(newPage, status);
-    entries.set(entryNr, results);
+    if(!entriesToRemove.has(entryNr)) {
+      entries.set(entryNr, results);
+    }
+    else {
+      entriesToRemove.delete(entryNr);
+    }
     await newPage.close();
   }
   await mainPage.waitFor(1000);
