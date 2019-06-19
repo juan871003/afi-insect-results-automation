@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const smsCtrlr = require('./smsCtrlr');
 
 let launchConfig = {headless: true};
 let entries = new Map();
@@ -15,7 +16,13 @@ const scrapperCtrl = {
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--single-process'],
         };
       }
-      
+      /*
+      sending sms for testing purposes: 
+       */
+      smsCtrlr.sendMessage('Testing in progress...');
+      /*
+      Finish testing
+       */
       setInterval(checkEntriesResultsLoop, intervalMinutes * 60000);
 
       initialised = true;
