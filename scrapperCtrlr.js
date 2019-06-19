@@ -16,13 +16,6 @@ const scrapperCtrl = {
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--single-process'],
         };
       }
-      /*
-      sending sms for testing purposes: 
-       */
-      smsCtrlr.sendMessage('Testing in progress...');
-      /*
-      Finish testing
-       */
       setInterval(checkEntriesResultsLoop, intervalMinutes * 60000);
 
       initialised = true;
@@ -32,11 +25,11 @@ const scrapperCtrl = {
   },
 
   addEntry(entryNr) {
-    entries.set(entryNr, {status: 'Processing...', comments: ''});
+    entries.set(entryNr, {status: 'Processing...', comments: '', needsScrapping: true });
   },
 
   removeEntry(entryNr) {
-    if(scrapping) {
+    if (scrapping) {
       entriesToRemove.add(entryNr);
     }
     entries.delete(entryNr);
@@ -48,11 +41,11 @@ const scrapperCtrl = {
 }
 
 async function checkEntriesResultsLoop() {
-  if(!scrapping) {
+  if (!scrapping) {
     const entriesToScrapp = [...entries]
-      .filter(keypair => keypair[1].status === 'Processing...')
+      .filter(keypair => keypair[1].needsScrapping === true)
       .map(keypair => keypair[0]);
-    if(entriesToScrapp.length > 0) {
+    if (entriesToScrapp.length > 0) {
       scrapping = true;
       await scrap(entriesToScrapp);
       scrapping = false;
@@ -64,13 +57,20 @@ async function scrap(entriesToScrapp) {
   browser = await puppeteer.launch(launchConfig);
   mainPage = await browser.newPage();
   await gotoMainPage(mainPage);
-  for(const entryNr of entriesToScrapp) {
-    let results = {status: 'Processing...', comments: ''};
+  for (const entryNr of entriesToScrapp) {
     const newPage = await getEntryPage(mainPage, entryNr);
     const status = await getEntryStatus(newPage);
-    results = await getEntryResults(newPage, status);
-    if(!entriesToRemove.has(entryNr)) {
+    const results = await getEntryResults(newPage, status);
+    if (!entriesToRemove.has(entryNr)) {
       entries.set(entryNr, results);
+      if (isCommentsBio(results.comments) && !results.needsScrapping) {
+        smsCtrlr.sendMessage(
+`Insect Results are ready for ${entryNr}
+follow this link for more info:
+https://tinyurl.com/AFI-Insect-Results
+
+Procusys Automation Team`)
+      }
     }
     else {
       entriesToRemove.delete(entryNr);
@@ -119,7 +119,6 @@ async function getEntryResults(newPage, status) {
   const pendingInsectsElHandle = await newPage.$x('//a[text()="Pending Insect ID"]');
   const pendingDiseaseElHandle = await newPage.$x('//a[text()="Pending Test Results"]');
   const fumigationElHandle = await newPage.$x('//a[text()="CH3Br 32gM3 2 hrs 21C or above"]');
-  const theStatus = status === 'Finalised' ? 'Finalised' : 'Processing...';
   let comments = '';
   if (pendingInsectsElHandle.length >= 1) {
     comments = await getCommentsContent(newPage, pendingInsectsElHandle);
@@ -133,7 +132,8 @@ async function getEntryResults(newPage, status) {
   await disposeHandle(pendingInsectsElHandle);
   await disposeHandle(pendingDiseaseElHandle);
   await disposeHandle(fumigationElHandle);
-  return { status: theStatus, comments: comments };
+  const needsScrapping = isNeedsScrapping(comments, status);
+  return { status: status, comments: comments, needsScrapping: needsScrapping };
 }
 
 async function getCommentsContent(newPage, elHandle) {
@@ -173,6 +173,14 @@ async function waitUntil(seconds) {
       reject(new Error(`timeout reached, waiting for ${seconds} seconds`));
     }, seconds * 1000);
   });
+}
+
+function isNeedsScrapping(comments, status) {
+  return status !== 'Finalised' && !isCommentsBio(comments);
+}
+
+function isCommentsBio(comments) {
+  return (comments.match(/of biosecurity concern/gi) || []).length > 0;
 }
 
 module.exports = scrapperCtrl;

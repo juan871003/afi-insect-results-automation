@@ -10,7 +10,7 @@ const smsCtrlr = {
     publishTextPromise
       .then(
         function (data) {
-          console.log("Message ${params.Message} send sent to the topic ${params.TopicArn}");
+          console.log("Message sent:", message);
           console.log("MessageID is " + data.MessageId);
         }
       ).catch(
