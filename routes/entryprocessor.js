@@ -9,13 +9,17 @@ router.initialiseScrpr = function(scpr) {
 
 router.get('/', function (req, res, next) {
   if (req.query.entry) {
-    const entryNr = req.query.entry;
-    scrapper.addEntry(entryNr);
+    const entryNr = req.query.entry.toUpperCase();
+    if (isValidEntryNr(entryNr)) {
+      scrapper.addEntry(entryNr);
+    }
   }
 
   if (req.query.removeentry) {
-    const entryNr = req.query.removeentry;
-    scrapper.removeEntry(entryNr);
+    const entryNr = req.query.removeentry.toUpperCase();
+    if(isValidEntryNr(entryNr)) {
+      scrapper.removeEntry(entryNr);
+    }
   }
 
   let response = [];
@@ -24,5 +28,13 @@ router.get('/', function (req, res, next) {
   }
   res.send(response);
 });
+
+function isValidEntryNr(entryNr) {
+  return (
+    entryNr.length > 0
+    && entryNr.length <= 15
+    && entryNr.match(/^[a-z0-9]+$/i)
+  )
+}
 
 module.exports = (scpr) => router.initialiseScrpr(scpr);

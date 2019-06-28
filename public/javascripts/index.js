@@ -1,7 +1,8 @@
 const entryNrApp = (function () {
 
-  const inputEntryNr = document.getElementById("input-entry-number");
-  const btnEntryNr = document.getElementById("button-entry-number");
+  const inputEntryNr = document.getElementById('input-entry-number');
+  const btnEntryNr = document.getElementById('button-entry-number');
+  const formEntry = document.getElementById('add-entry-form');
   const entryStatusTmpltId = 'entry-status-{entryNr}';
   const rmEntryBtnTmpltId = 'button-remove-{entryNr}';
   const entryStatusInnerTmplt =
@@ -26,16 +27,16 @@ const entryNrApp = (function () {
   `;
 
   function clearInputs() {
-    inputEntryNr.value = "";
+    inputEntryNr.value = '';
     btnEntryNr.disabled = true;
   }
 
-  function isValidEntry(entry) {
+  function isValidEntry(entryNr) {
     return (
-      entry
-      && entry.length > 0
-      && entry.length < 15
-      && entry.match(/^[0-9a-zA-Z]+$/)
+      entryNr
+      && entryNr.length > 0
+      && entryNr.length <= 15
+      && entryNr.match(/^[a-z0-9]+$/i)
     )
   }
 
@@ -63,26 +64,30 @@ const entryNrApp = (function () {
     }
   }
 
-  function setupEventListeners() {
-    btnEntryNr.addEventListener("click", () => {
-      const entryNr = inputEntryNr.value;
-      if (isValidEntry(entryNr)) {
-        const xhttp = new XMLHttpRequest();
-        xhttp.open('GET', `processentry?entry=${entryNr}`, true);
-        xhttp.send();
-        xhttp.onreadystatechange = function () {
-          if (this.readyState == 4 && this.status == 200) {
-            updateUIEntry(JSON.parse(this.response));
-            clearInputs();
-          }
-        };
-      }
-    });
+  function processForm() {
+    const entryNr = (inputEntryNr.value || '').trim().toUpperCase();
+    if (isValidEntry(entryNr)) {
+      const xhttp = new XMLHttpRequest();
+      xhttp.open('GET', `processentry?entry=${entryNr}`, true);
+      xhttp.send();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          updateUIEntry(JSON.parse(this.response));
+          clearInputs();
+        }
+      };
+    }
+  }
 
-    inputEntryNr.addEventListener("keyup", () => {
+  function setupEventListeners() {
+    btnEntryNr.addEventListener('click', () => processForm());
+
+    inputEntryNr.addEventListener('keyup', () => {
       const userInput = inputEntryNr.value;
       btnEntryNr.disabled = !(userInput && userInput.length > 0);
     });
+
+    formEntry.addEventListener('submit', () => processForm());
   }
 
   function getResults() {

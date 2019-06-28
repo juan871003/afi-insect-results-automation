@@ -6,11 +6,12 @@ let entries = new Map();
 let entriesToRemove = new Set();
 let initialised = false;
 let scrapping = false;
+const entryNotFound = 'Entry Not Found';
 
 const scrapperCtrl = {
   initialise: async function(env, intervalMinutes) {
     if (!initialised) {
-      if (env !== 'dev') {
+      if (env !== 'development') {
         launchConfig = { 
           headless: true, 
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--single-process'],
@@ -54,31 +55,48 @@ async function checkEntriesResultsLoop() {
 }
 
 async function scrap(entriesToScrapp) {
-  browser = await puppeteer.launch(launchConfig);
-  mainPage = await browser.newPage();
-  await gotoMainPage(mainPage);
-  for (const entryNr of entriesToScrapp) {
-    const newPage = await getEntryPage(mainPage, entryNr);
-    const status = await getEntryStatus(newPage);
-    const results = await getEntryResults(newPage, status);
-    if (!entriesToRemove.has(entryNr)) {
-      entries.set(entryNr, results);
-      if (isCommentsBio(results.comments) && !results.needsScrapping) {
-        smsCtrlr.sendMessage(
+  let browser = null;
+  let mainPage = null;
+  try {
+    browser = await puppeteer.launch(launchConfig);
+    mainPage = await browser.newPage();
+    await gotoMainPage(mainPage);
+    for (const entryNr of entriesToScrapp) {
+      const newPage = await getEntryPage(mainPage, entryNr);
+      const status = await getEntryStatus(newPage);
+      let results = { 
+        status: entryNotFound, 
+        comments: '', 
+        needsScrapping: false 
+      };
+      if (status !== entryNotFound) {
+        results = await getEntryResults(newPage, status);
+      }
+      if (!entriesToRemove.has(entryNr)) {
+        entries.set(entryNr, results);
+        if (isCommentsBio(results.comments) && !results.needsScrapping) {
+          smsCtrlr.sendMessage(
 `Insect Results are ready for ${entryNr}
 follow this link for more info:
 https://tinyurl.com/AFI-Insect-Results
 
 Procusys Automation Team`)
+        }
       }
+      else {
+        entriesToRemove.delete(entryNr);
+      }
+      await newPage.close();
     }
-    else {
-      entriesToRemove.delete(entryNr);
-    }
-    await newPage.close();
   }
-  await mainPage.waitFor(1000);
-  await browser.close();
+  catch (e) {
+    console.error(e);
+    console.trace();
+  }
+  finally {
+    if (mainPage) { await mainPage.waitFor(1000); }
+    if (browser) { await browser.close(); }
+  }
 }
 
 async function gotoMainPage(page) {
@@ -107,11 +125,16 @@ async function getEntryPage(page, entryNr) {
 
 async function getEntryStatus(newPage) {
   const statusXpath = '//td/b[text()="Status:"]/../following-sibling::td[1]';
-  await newPage.waitForXPath(statusXpath);
-  const statusHandle = await newPage.$x(statusXpath);
-  const status = await newPage.evaluate(statusEl => statusEl.textContent, statusHandle[0]);
-  await disposeHandle(statusHandle);
-  return status;
+  try {
+    await newPage.waitForXPath(statusXpath);
+    const statusHandle = await newPage.$x(statusXpath);
+    const status = await newPage.evaluate(statusEl => statusEl.textContent, statusHandle[0]);
+    await disposeHandle(statusHandle);
+    return status;
+  }
+  catch (e) {
+    return entryNotFound;
+  }
 }
 
 async function getEntryResults(newPage, status) {
@@ -143,7 +166,7 @@ async function getCommentsContent(newPage, elHandle) {
     newPage.browser().once('targetcreated', target => x(target.page())));
   // wait for targetcreated for 30 seconds, not forever.
   const thirdPagePromise =
-    Promise.race([targetCreatedPromise, waitUntil(30)]);
+    Promise.race([targetCreatedPromise, waitUntil(29)]);
   const linkEl = await elHandle[0];
   await linkEl.click();
   const thirdPage = await thirdPagePromise;
