@@ -87,7 +87,10 @@ const entryNrApp = (function () {
       btnEntryNr.disabled = !(userInput && userInput.length > 0);
     });
 
-    formEntry.addEventListener('submit', () => processForm());
+    formEntry.addEventListener('submit', (event) => {
+      event.preventDefault();
+      processForm();
+    });
   }
 
   function getResults() {
