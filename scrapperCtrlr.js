@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer');
 const smsCtrlr = require('./smsCtrlr');
-const credentials = require('./credentials');
+const credentials = require('./credentials').default;
 
 let launchConfig = {headless: true};
 let entries = new Map();
