@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const smsCtrlr = require('./smsCtrlr');
+const credentials = require('./credentials');
 
 let launchConfig = {headless: true};
 let entries = new Map();
@@ -102,9 +103,9 @@ Procusys Automation Team`)
 async function gotoMainPage(page) {
   await page.goto('https://apps.daff.gov.au/BrokerReports/ASP/Login.asp');
   await page.click('#username');
-  await page.keyboard.type('com043707');
+  await page.keyboard.type(credentials.brokerusername);
   await page.click('#password');
-  await page.keyboard.type('19rohini');
+  await page.keyboard.type(credentials.brokerpassword);
   await page.click('input[name="btnSubmit"]');
   await page.goto('https://apps.daff.gov.au/BrokerReports/asp/SingleEntry.asp');
 }

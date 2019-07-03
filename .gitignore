@@ -1,0 +1,11 @@
+# Elastic Beanstalk Files
+.elasticbeanstalk/
+
+# Node Files
+node_modules/
+
+# credentials
+credentials.js
+
+#vscode
+.vscode/
