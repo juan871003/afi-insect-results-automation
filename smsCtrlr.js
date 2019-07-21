@@ -1,4 +1,5 @@
 const AWS = require('aws-sdk');
+const credentials = require('./credentials').default;
 const params = {};
 let initialised = false;
 
@@ -23,8 +24,7 @@ const smsCtrlr = {
 
 function initialise() {
   AWS.config.update({ region: 'ap-southeast-2' });
-  params.TopicArn = 'arn:aws:sns:ap-southeast-2:700761671561:Insects';
-  //params.TopicArn = 'arn:aws:sns:ap-southeast-2:700761671561:NotifyMe';
+  params.TopicArn = credentials.snsTopicArn;
   initialised = true;
 }
 
