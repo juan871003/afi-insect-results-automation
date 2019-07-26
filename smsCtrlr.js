@@ -1,11 +1,11 @@
 const AWS = require('aws-sdk');
-const credentials = require('./credentials').default;
+const credentials = require('./credentials');
 const params = {};
 let initialised = false;
 
 const smsCtrlr = {
-  sendMessage: async function (message) {
-    if(!initialised) { initialise(); }
+  sendMessage: async function (message, environment) {
+    if(!initialised) { initialise(environment); }
     params.Message = message;
     const publishTextPromise = new AWS.SNS({ apiVersion: '2010-03-31' }).publish(params).promise();
     publishTextPromise
@@ -22,9 +22,12 @@ const smsCtrlr = {
   }
 }
 
-function initialise() {
+function initialise(environment) {
   AWS.config.update({ region: 'ap-southeast-2' });
-  params.TopicArn = credentials.snsTopicArn;
+  params.TopicArn = 
+    environment === 'production' ? 
+    credentials.snsProdTopicArn :
+    credentials.snsDevTopicArn;
   initialised = true;
 }
 

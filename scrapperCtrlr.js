@@ -1,18 +1,20 @@
 const puppeteer = require('puppeteer');
 const smsCtrlr = require('./smsCtrlr');
-const credentials = require('./credentials').default;
+const credentials = require('./credentials');
 
 let launchConfig = {headless: true};
 let entries = new Map();
 let entriesToRemove = new Set();
 let initialised = false;
 let scrapping = false;
+let environment = 'development';
 const entryNotFound = 'Entry Not Found';
 
 const scrapperCtrl = {
   initialise: async function(env, intervalMinutes) {
     if (!initialised) {
-      if (env !== 'development') {
+      environment = env;
+      if (environment !== 'development') {
         launchConfig = { 
           headless: true, 
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--single-process'],
@@ -81,7 +83,7 @@ async function scrap(entriesToScrapp) {
 follow this link for more info:
 https://tinyurl.com/AFI-Insect-Results
 
-Procusys Automation Team`)
+Procusys Automation Team`, environment)
         }
       }
       else {
