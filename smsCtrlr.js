@@ -4,8 +4,11 @@ const params = {};
 let initialised = false;
 
 const smsCtrlr = {
-  sendMessage: async function (message, environment) {
-    if(!initialised) { initialise(environment); }
+  sendMessage: async function (message, isTesting) {
+    if(!initialised) { initialise(); }
+    params.TopicArn = isTesting ? 
+      credentials.snsProdTopicArn :
+      credentials.snsDevTopicArn;
     params.Message = message;
     const publishTextPromise = new AWS.SNS({ apiVersion: '2010-03-31' }).publish(params).promise();
     publishTextPromise
@@ -22,12 +25,8 @@ const smsCtrlr = {
   }
 }
 
-function initialise(environment) {
+function initialise() {
   AWS.config.update({ region: 'ap-southeast-2' });
-  params.TopicArn = 
-    environment === 'production' ? 
-    credentials.snsProdTopicArn :
-    credentials.snsDevTopicArn;
   initialised = true;
 }
 

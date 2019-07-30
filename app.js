@@ -11,14 +11,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/processentry', function (req, res, next) {
   if (req.query.entry) {
-    const entryNr = req.query.entry.toUpperCase();
+    const entryNr = formatEntryNr(req.query.entry);
     if (isValidEntryNr(entryNr)) {
       scrapper.addEntry(entryNr);
     }
   }
 
   if (req.query.removeentry) {
-    const entryNr = req.query.removeentry.toUpperCase();
+    const entryNr = formatEntryNr(req.query.removeentry);
     if(isValidEntryNr(entryNr)) {
       scrapper.removeEntry(entryNr);
     }
@@ -31,11 +31,17 @@ app.get('/processentry', function (req, res, next) {
   res.send(response);
 });
 
-function isValidEntryNr(entryNr) {
+function formatEntryNr(entryNr) {
+  return (entryNr || '').trim().toUpperCase();
+}
+
+function isValidEntryNr(entryNumber) {
+  const entryNr = formatEntryNr(entryNumber);
   return (
-    entryNr.length > 0
-    && entryNr.length <= 15
-    && entryNr.match(/^[a-z0-9]+$/i)
+    entryNr
+    && entryNr.length > 0
+    && entryNr.length <= 25
+    && entryNr.match(/^[a-z0-9]+(?:-test)?$/i)
   )
 }
 

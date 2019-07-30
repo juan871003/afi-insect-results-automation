@@ -28,8 +28,15 @@ const scrapperCtrl = {
     return false;
   },
 
-  addEntry(entryNr) {
-    entries.set(entryNr, {status: 'Processing...', comments: '', needsScrapping: true });
+  addEntry(entryNumber) {
+    const entryNr = entryNumber.replace('-TEST', '');
+    const params = {
+      status: 'Processing...', 
+      comments: '', 
+      needsScrapping: true, 
+      isTest: entryNr.indexOf('-TEST') > -1 
+    };
+    entries.set(entryNr, params);
   },
 
   removeEntry(entryNr) {
@@ -47,8 +54,8 @@ const scrapperCtrl = {
 async function checkEntriesResultsLoop() {
   if (!scrapping) {
     const entriesToScrapp = [...entries]
-      .filter(keypair => keypair[1].needsScrapping === true)
-      .map(keypair => keypair[0]);
+      .filter(keypair => keypair[1].needsScrapping === true);
+      //.map(keypair => keypair[0]);
     if (entriesToScrapp.length > 0) {
       scrapping = true;
       await scrap(entriesToScrapp);
@@ -64,26 +71,28 @@ async function scrap(entriesToScrapp) {
     browser = await puppeteer.launch(launchConfig);
     mainPage = await browser.newPage();
     await gotoMainPage(mainPage);
-    for (const entryNr of entriesToScrapp) {
+    for (const [entryNr, params] of entriesToScrapp) {
       const newPage = await getEntryPage(mainPage, entryNr);
       const status = await getEntryStatus(newPage);
       let results = { 
         status: entryNotFound, 
         comments: '', 
-        needsScrapping: false 
+        needsScrapping: false, 
+        isTest: params.isTest
       };
       if (status !== entryNotFound) {
-        results = await getEntryResults(newPage, status);
+        results = await getEntryResults(newPage, params);
       }
       if (!entriesToRemove.has(entryNr)) {
         entries.set(entryNr, results);
         if (isCommentsBio(results.comments) && !results.needsScrapping) {
+          const testing = environment === 'development' || results.isTest;
           smsCtrlr.sendMessage(
 `Insect Results are ready for ${entryNr}
 follow this link for more info:
 https://tinyurl.com/AFI-Insect-Results
 
-Procusys Automation Team`, environment)
+Procusys Automation Team`, testing)
         }
       }
       else {
@@ -140,7 +149,7 @@ async function getEntryStatus(newPage) {
   }
 }
 
-async function getEntryResults(newPage, status) {
+async function getEntryResults(newPage, oldParams) {
   await newPage.waitForXPath('//a[text()="Present all documentation"]');
   const pendingInsectsElHandle = await newPage.$x('//a[text()="Pending Insect ID"]');
   const pendingDiseaseElHandle = await newPage.$x('//a[text()="Pending Test Results"]');
@@ -158,8 +167,8 @@ async function getEntryResults(newPage, status) {
   await disposeHandle(pendingInsectsElHandle);
   await disposeHandle(pendingDiseaseElHandle);
   await disposeHandle(fumigationElHandle);
-  const needsScrapping = isNeedsScrapping(comments, status);
-  return { status: status, comments: comments, needsScrapping: needsScrapping };
+  const needsScrapping = isNeedsScrapping(comments, oldParams.status);
+  return { status: oldParams.status, comments: comments, needsScrapping: needsScrapping, isTest: oldParams.isTest };
 }
 
 async function getCommentsContent(newPage, elHandle) {

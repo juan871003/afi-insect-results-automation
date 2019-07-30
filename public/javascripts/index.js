@@ -31,13 +31,18 @@ const entryNrApp = (function () {
     btnEntryNr.disabled = true;
   }
 
-  function isValidEntry(entryNr) {
+  function isValidEntryNr(entryNumber) {
+    const entryNr = formatEntryNr(entryNumber);
     return (
       entryNr
       && entryNr.length > 0
-      && entryNr.length <= 15
-      && entryNr.match(/^[a-z0-9]+$/i)
+      && entryNr.length <= 25
+      && entryNr.match(/^[a-z0-9]+(?:-test)?$/i)
     )
+  }
+
+  function formatEntryNr(entryNr) {
+    return (entryNr || '').trim().toUpperCase();
   }
 
   function updateUIEntry(response) {
@@ -65,8 +70,8 @@ const entryNrApp = (function () {
   }
 
   function processForm() {
-    const entryNr = (inputEntryNr.value || '').trim().toUpperCase();
-    if (isValidEntry(entryNr)) {
+    const entryNr = formatEntryNr(inputEntryNr.value);
+    if (isValidEntryNr(entryNr)) {
       const xhttp = new XMLHttpRequest();
       xhttp.open('GET', `processentry?entry=${entryNr}`, true);
       xhttp.send();
@@ -83,8 +88,8 @@ const entryNrApp = (function () {
     btnEntryNr.addEventListener('click', () => processForm());
 
     inputEntryNr.addEventListener('keyup', () => {
-      const userInput = inputEntryNr.value;
-      btnEntryNr.disabled = !(userInput && userInput.length > 0);
+      const userInput = formatEntryNr(inputEntryNr.value);
+      btnEntryNr.disabled = !isValidEntryNr(userInput);
     });
 
     formEntry.addEventListener('submit', (event) => {
