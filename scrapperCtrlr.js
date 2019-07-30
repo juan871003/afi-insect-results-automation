@@ -34,7 +34,7 @@ const scrapperCtrl = {
       status: 'Processing...', 
       comments: '', 
       needsScrapping: true, 
-      isTest: entryNr.indexOf('-TEST') > -1 
+      isTest: entryNumber.indexOf('-TEST') > -1 
     };
     entries.set(entryNr, params);
   },

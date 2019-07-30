@@ -7,8 +7,8 @@ const smsCtrlr = {
   sendMessage: async function (message, isTesting) {
     if(!initialised) { initialise(); }
     params.TopicArn = isTesting ? 
-      credentials.snsProdTopicArn :
-      credentials.snsDevTopicArn;
+      credentials.snsDevTopicArn:
+      credentials.snsProdTopicArn;
     params.Message = message;
     const publishTextPromise = new AWS.SNS({ apiVersion: '2010-03-31' }).publish(params).promise();
     publishTextPromise
