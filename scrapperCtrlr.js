@@ -14,6 +14,7 @@ const scrapperCtrl = {
   initialise: async function(env, intervalMinutes) {
     if (!initialised) {
       environment = env;
+      console.log(`Time = ${(new Date(Date.now())).toLocaleString()}, env = ${env}`);
       if (environment !== 'development') {
         launchConfig = { 
           headless: true, 
