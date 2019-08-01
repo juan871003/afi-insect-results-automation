@@ -86,6 +86,7 @@ async function scrap(entriesToScrapp) {
       if (!entriesToRemove.has(entryNr)) {
         entries.set(entryNr, results);
         if (isCommentsBio(results.comments) && !results.needsScrapping) {
+          console.log(`Time = ${(new Date(Date.now())).toLocaleString()}, entryNr = ${entryNr}, environment = ${environment}, isTest = ${results.isTest}`);
           const testing = environment === 'development' || results.isTest;
           smsCtrlr.sendMessage(
 `Insect Results are ready for ${entryNr}
